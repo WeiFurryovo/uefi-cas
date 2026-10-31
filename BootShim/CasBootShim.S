@@ -120,6 +120,47 @@ _Start:
   strb  w6, [x4], #1
   subs  x5, x5, #1
   b.ne  6b
+
+  // Move the ABL ramdisk (the UniXNU payload FAT) to CAS_PAYLOAD_BASE, where SEC
+  // publishes it as the RAM disk. The validator bounded the source to the input
+  // window and the size to CAS_PAYLOAD_SIZE. With the MMU off the accesses are
+  // Device memory, so only a 16-byte aligned source and size are moved; SEC
+  // rejects anything else. Copy backwards when the destination lies above.
+  ldr   x8, =CAS_LOG_BASE
+  ldr   x3, [x8, #56]          // OriginalInitrd
+  ldr   x5, [x8, #64]          // InitrdSize
+  ldr   x4, =CAS_PAYLOAD_BASE
+  orr   x9, x3, x5
+  tst   x9, #15
+  b.ne  14f
+  cbz   x5, 14f
+  mrs   x9, ctr_el0
+  ubfx  x9, x9, #16, #4
+  mov   x10, #4
+  lsl   x9, x10, x9
+  mov   x10, x4
+  add   x7, x4, x5
+11: dc    ivac, x10
+  add   x10, x10, x9
+  cmp   x10, x7
+  b.lo  11b
+  dsb   sy
+  cmp   x4, x3
+  b.eq  14f
+  b.hi  13f
+12: ldp   x6, x7, [x3], #16
+  stp   x6, x7, [x4], #16
+  subs  x5, x5, #16
+  b.ne  12b
+  b     14f
+13: add   x3, x3, x5
+  add   x4, x4, x5
+15: ldp   x6, x7, [x3, #-16]!
+  stp   x6, x7, [x4, #-16]!
+  subs  x5, x5, #16
+  b.ne  15b
+14: dsb   sy
+  ldr   x8, =CAS_LOG_BASE
   mov   w9, #3
   str   w9, [x8, #12]
   mov   w0, #3
