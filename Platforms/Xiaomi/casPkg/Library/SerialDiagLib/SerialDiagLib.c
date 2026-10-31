@@ -23,7 +23,9 @@ UINTN EFIAPI SerialPortWrite (UINT8 *Buffer, UINTN Count) {
   Written = CasRamLogWrite (Buffer, Count);
   // The shared guard also blocks synchronous exception logging from recursing
   // through framebuffer access. This CPU0 diagnostic has no SMP writers.
-  if (!Written || Info->Stage >= CasStageDxe) { goto Done; }
+  // Keep drawing through DXE dispatch so a driver that stalls before BDS, or a
+  // CpuDxe exception dump, stays visible; BDS owns the screen from then on.
+  if (!Written || Info->Stage >= CasStageBds) { goto Done; }
   if (!CasEarlyTextValid (T)) { CasEarlyTextReset (T); }
   if (*(volatile CAS_U32 *)&T->Busy || (T->Frozen &&
       (!(T->FaultMask & CAS_FAULT_ARMED) || (T->FaultMask & CAS_FAULT_CONFLICT) ||
