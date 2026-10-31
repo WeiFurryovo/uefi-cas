@@ -28,4 +28,10 @@
   FatPkg/EnhancedFatDxe/Fat.inf
   casPkg/Applications/CasSmoke/CasSmoke.inf
   casPkg/Applications/CasDiag/CasDiag.inf
-  DarwinBootPkg/Driver/DarwinBoot.inf
+  DarwinBootPkg/Driver/DarwinBoot.inf {
+    <PcdsFixedAtBuild>
+      # DarwinBoot prints from its entry point during DXE dispatch, before BDS
+      # connects a console. UefiLib then skips the output, but the DEBUG
+      # Console != NULL assert dead-loops; report asserts here and continue.
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x0F
+  }
