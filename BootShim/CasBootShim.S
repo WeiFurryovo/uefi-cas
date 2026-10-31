@@ -152,13 +152,18 @@ _Start:
   stp   x6, x7, [x4], #16
   subs  x5, x5, #16
   b.ne  12b
-  b     14f
+  b     16f
 13: add   x3, x3, x5
   add   x4, x4, x5
 15: ldp   x6, x7, [x3, #-16]!
   stp   x6, x7, [x4, #-16]!
   subs  x5, x5, #16
   b.ne  15b
+16: // The payload now lives at CAS_PAYLOAD_BASE and its source may be overwritten
+  // (the ranges can overlap), so point OriginalInitrd there: SEC's own CopyMem
+  // then has equal source and destination and moves nothing.
+  ldr   x4, =CAS_PAYLOAD_BASE
+  str   x4, [x8, #56]
 14: dsb   sy
   ldr   x8, =CAS_LOG_BASE
   mov   w9, #3

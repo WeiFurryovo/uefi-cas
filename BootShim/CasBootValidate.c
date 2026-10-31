@@ -237,7 +237,9 @@ U32 CasValidateBoot (U64 KernelBase, U64 KernelSize, U64 FdtAddress,
     return CasBootInitrd;
   }
   if (Overlap (InitrdStart, InitrdEnd - InitrdStart, KernelBase, KernelSize) ||
-      Overlap (InitrdStart, InitrdEnd - InitrdStart, FdtAddress, Total)) {
+      Overlap (InitrdStart, InitrdEnd - InitrdStart, FdtAddress, Total) ||
+      // The shim runs from KernelBase while it moves the payload; the move must not reach it.
+      Overlap (CAS_PAYLOAD_BASE, InitrdEnd - InitrdStart, KernelBase, KernelSize)) {
     return CasBootInputOverlap;
   }
   for (Cursor = 0; Cursor < sizeof (*Info); ++Cursor) { ((U8 *)Info)[Cursor] = 0; }

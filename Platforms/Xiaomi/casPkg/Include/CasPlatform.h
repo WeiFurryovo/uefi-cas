@@ -39,7 +39,9 @@
 #define CAS_KERNEL_BASE     0xa0000000
 #define CAS_KERNEL_SIZE     0x04000000
 #define CAS_PAYLOAD_BASE    0xa4000000
-#define CAS_PAYLOAD_SIZE    0x04000000
+// Up to CAS_INPUT_END: the owner-root kernel embeds ~73 MB of signed block hashes, so the payload
+// outgrows 64 MiB; the former upper_input window above it is part of this region.
+#define CAS_PAYLOAD_SIZE    0x0c000000
 #define CAS_INPUT_END       0xb0000000
 #define CAS_TEXT_OFFSET     0x00080000
 #define CAS_SPLASH_BASE     0x9c000000
