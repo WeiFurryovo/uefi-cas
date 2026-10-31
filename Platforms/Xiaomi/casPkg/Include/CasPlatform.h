@@ -15,6 +15,10 @@
 #define CAS_LOG_SIZE        0x00040000
 #define CAS_DIAG_HIGH_BASE 0x100000000ULL
 #define CAS_DIAG_HIGH_SIZE 0x20000000ULL
+// Conventional RAM handed to DarwinBoot for the XNU owned window; inside the
+// 0xc0000000..0x280000000 bank of the 8 GiB phone and clear of every reservation.
+#define CAS_XNU_HIGH_BASE 0x100000000ULL
+#define CAS_XNU_HIGH_SIZE 0x140000000ULL
 #define CAS_SMEM_BASE 0x80900000ULL
 #define CAS_SMEM_SIZE 0x200000ULL
 // Diagnostic mailbox and legacy text slots are outside the volatile log prefix.

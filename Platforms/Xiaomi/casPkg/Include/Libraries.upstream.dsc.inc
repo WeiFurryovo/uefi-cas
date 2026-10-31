@@ -27,7 +27,7 @@
   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/DxeCpuExceptionHandlerLib.inf
   CacheMaintenanceLib|ArmPkg/Library/ArmCacheMaintenanceLib/ArmCacheMaintenanceLib.inf
   ArmMmuLib|UefiCpuPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
-  MemoryMapLib|casPkg/Library/MemoryMapDiagLib/MemoryMapDiagLib.inf
+  MemoryMapLib|casPkg/Library/MemoryMapXnuLib/MemoryMapXnuLib.inf
   MemoryInitPeiLib|SiliciumPkg/Library/MemoryInitPeiLib/MemoryInitPeiLib.inf
   MemoryMapHelperLib|SiliciumPkg/Library/MemoryMapHelperLib/MemoryMapHelperLib.inf
   ConfigurationMapLib|casPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf
