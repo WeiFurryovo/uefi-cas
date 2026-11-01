@@ -40,6 +40,7 @@ VOID SecEntry (UINTN FdtAddress, UINTN InfoAddress) {
   CAS_BOOT_INFO *Info = (VOID *)(UINTN)CAS_LOG_BASE;
   DXE_MEMORY_PROTECTION_SETTINGS Protection;
   UINT64 Dtb;
+  UINTN Block;
 
   // The only supported entry is the validated cas shim; reject stale handoffs.
   if (InfoAddress != CAS_LOG_BASE || FdtAddress != CAS_FDT_BASE ||
@@ -91,6 +92,17 @@ VOID SecEntry (UINTN FdtAddress, UINTN InfoAddress) {
   if (EFI_ERROR (Status)) { Stop (Status); }
   Status = ArmSetMemoryAttributes (CAS_SPLASH_BASE, CAS_SPLASH_SIZE, EFI_MEMORY_XP, EFI_MEMORY_XP);
   if (EFI_ERROR (Status)) { Stop (Status); }
+  // Map the whole DXE heap with pages now, while nothing runs from it. Otherwise
+  // DXE splits a live 2 MiB block when it protects an image loaded there; if that
+  // block also holds the module's own ArmReplaceLiveTranslationEntry copy, ArmMmuLib
+  // splits it with the MMU off, which faults on this platform (CpuDxe, m2b-001).
+  // Toggling XP on one page per block splits it; the pages keep the block's attributes.
+  for (Block = CAS_HEAP_BASE; Block < CAS_HEAP_BASE + CAS_HEAP_SIZE; Block += SIZE_2MB) {
+    Status = ArmSetMemoryAttributes (Block, EFI_PAGE_SIZE, EFI_MEMORY_XP, EFI_MEMORY_XP);
+    if (EFI_ERROR (Status)) { Stop (Status); }
+    Status = ArmSetMemoryAttributes (Block, EFI_PAGE_SIZE, 0, EFI_MEMORY_XP);
+    if (EFI_ERROR (Status)) { Stop (Status); }
+  }
 #ifdef CAS_XNU_DIAGNOSTICS
   // Only the diagnostic map includes this existing reserved region. Never add
   // it to conventional RAM. SEC installs RO/XP before entering any DXE module.
